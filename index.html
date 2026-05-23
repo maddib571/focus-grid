@@ -204,15 +204,74 @@
             font-weight: bold;
         }
 
-        /* Print Settings */
+       /* Fixed Print Settings to Prevent Cropping */
         @media print {
+            /* 1. Hide input card and controls completely */
             .app-header, .input-card, .control-panel, .delete-btn {
                 display: none !important;
             }
-            body { padding: 0; background: white; }
-            .table-container { border: none; padding: 0; box-shadow: none; }
-            th { background-color: #f3e8ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .activity-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            /* 2. Reset page margins and force landscape sizing */
+            @page {
+                size: landscape;
+                margin: 10mm; /* Gives a clean safety margin around the paper */
+            }
+            
+            body { 
+                padding: 0; 
+                margin: 0; 
+                background: white; 
+                width: 100% !important;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            
+            /* 3. Force the container to lock inside the page width */
+            .table-container { 
+                border: none; 
+                padding: 0; 
+                box-shadow: none;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+            }
+            
+            table {
+                width: 100% !important;
+                max-width: 100% !important;
+                border-collapse: collapse;
+                table-layout: fixed; /* Forces all columns to divide the page space equally */
+            }
+
+            th, td {
+                padding: 8px 4px !important; /* Reduced padding to fit text without breaking columns */
+                font-size: 12px !important;  /* Slightly smaller font to guarantee it fits A4 landscape */
+                word-wrap: break-word;       /* Forces long words to wrap instead of pushing boundaries */
+                min-width: 0 !important;     /* Removes the previous min-width restriction */
+            }
+
+            th { 
+                background-color: #f3e8ff !important; 
+                color: #6b21a8 !important;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+
+            .time-column { 
+                background-color: #faf5ff !important; 
+                color: #4c1d95 !important;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                width: 12% !important; /* Locks the time column size safely */
+            }
+
+            .activity-block { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                padding: 6px 4px !important;
+                font-size: 11px !important;
+                border-radius: 4px;
+            }
         }
     </style>
 </head>
@@ -424,6 +483,22 @@
     }
 
     buildLegend();
+
+    function downloadSchedule() {
+    // Check if there are actually activities to print
+    if (activities.length === 0) {
+        alert("Please add at least one activity to your timetable before downloading!");
+        return;
+    }
+
+    // Turn off edit mode automatically so delete buttons don't clip into the download
+    if (isEditMode) {
+        toggleEdit();
+    }
+    
+    // Trigger browser print window cleanly
+    window.print();
+}
 </script>
 
 </body>
